@@ -50,7 +50,9 @@ function main(program) {
 
 function readGenFile(genfilePath) {
     let genData = YAML.load(genfilePath);
-    return Promise.all(genData.map(f => replaceFile(f.output, f.data, f.inputs)));
+    let genSingleOutput = (inputs, output, data) => replaceFile(output, data, inputs);
+    let mapOutputs = o => Object.keys(o.outputs).map((k)=> genSingleOutput(o.inputs, k, o.outputs[k]));
+    return Promise.all(genData.reduce((memo,f)=> memo.concat(mapOutputs(f)), []));
 }
 
 
