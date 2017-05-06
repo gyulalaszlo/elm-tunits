@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "gen": "",
-    "generate": "node ./generate -g genfiles.yaml"
+    "generate": "gen-gen-gen -g genfiles.yaml"
   },
   "author": "",
   "license": "BSD",
