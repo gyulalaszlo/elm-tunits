@@ -1,110 +1,109 @@
-module Units.Compose.Tri exposing (..)
+module Units.Compose.NDimensional exposing (..)
 {-| Describe me please...
 -}
-
 import Lens exposing (Lens)
 import Lens.Common exposing (lensForField)
 import Math.Vector3
 
-type alias Tri v = { x: v, y: v, z: v}
-
-make : v -> Tri v
-make v = { x = v, y = v, z = v}
-
-make3 : v -> v -> v -> Tri v
-make3 v vv vvv = { x = v, y = vv, z = vvv}
-
-type TriAxis = XX | YY | ZZ
-
-axisNames : List String
-axisNames = ["x", "y", "z"]
-
-axisName : TriAxis -> String
-axisName t =
-    case t of
-        XX -> "x"
-        YY -> "y"
-        ZZ -> "z"
-
-get : TriAxis -> Tri v -> v
-get a t =
-    case a of
-        XX -> t.x
-        YY -> t.y
-        ZZ -> t.z
-
-set : TriAxis -> v -> Tri v -> Tri v
-set a v t =
-    case a of
-        XX -> { t | x = v }
-        YY -> { t | y = v }
-        ZZ -> { t | z = v }
 
 
-{-| Transforms the values of a Tri using `fn`
--}
-map : (v -> c) -> Tri v -> Tri c
-map fn t =
-    { x = fn t.x
-    , y = fn t.y
-    , z = fn t.z
-    }
 
-{-| Transforms the values of a Tri using `fn`
--}
-axisMap : (TriAxis -> v -> c) -> Tri v -> Tri c
-axisMap fn t =
-    { x = fn XX t.x
-    , y = fn YY t.y
-    , z = fn ZZ t.z
-    }
-{-| Applies a the functions in a function Tri to a value Tri's corresponding elements
--}
-apply : Tri (v -> c) -> Tri v -> Tri c
-apply fns t =
-    { x = fns.x t.x
-    , y = fns.y t.y
-    , z = fns.z t.z
+-- Dimension: 3
+--------------------------------------------------------------------------------
+
+
+type alias Tri v =
+    { x : v
+    , y : v
+    , z : v
     }
 
 
-fold : (v -> a -> a) -> a -> Tri v -> a
-fold fn a tri =
-    a |> fn tri.x |> fn tri.y |> fn tri.z
+
+triFromUniform : v -> Tri v
+triFromUniform v = {  x = v ,  y = v ,  z = v  }
 
 
 
-toList : Tri v -> List v
-toList t = [t.x,t.y, t.z]
-
-
-axisToLens : TriAxis -> Lens (Tri b) b
-axisToLens a =
-    case a of
-        XX -> lensForField.x
-        YY -> lensForField.y
-        ZZ -> lensForField.z
-
-{-| returns a new lens for the given axis inside the Tri pointed to by `lens`
+{-| Creates a composite unit from component values
 -}
-concatAxisToLens : TriAxis -> Lens a (Tri b) -> Lens a b
-concatAxisToLens axis lens =
-    Lens.concat lens <| axisToLens axis
+triFrom : v -> v -> v -> Tri v
+triFrom x y z = {  x = x ,  y = y ,  z = z  }
 
 
-fromVec3 : Math.Vector3.Vec3 -> Tri Float
-fromVec3 = Math.Vector3.toRecord
+type TriAxis
+    = XXX
+    | YYY
+    | ZZZ
 
-toVec3 : Tri Float -> Math.Vector3.Vec3
-toVec3 = Math.Vector3.fromRecord
+triNames : List String
+triNames  =
+    [ "x", "y", "z" ]
 
-vec3Lens : Lens Math.Vector3.Vec3 (Tri Float)
-vec3Lens = { name = "V3 <-> Tri", get = \v -> Ok <| fromVec3 v, set = \v p -> Ok <| toVec3 v }
 
---type alias LensTraits v componentTraits x =
---    { x
---    | componentLens: Lens a v
---    , componentTraits: componentTraits
---    }
+triName : TriAxis -> String
+triName a =
+    case a of
+        XXX -> "x"
+        YYY -> "y"
+        ZZZ -> "z"
+
+
+triGet : TriAxis -> Tri v -> v
+triGet a d =
+    case a of
+        XXX -> d.x
+        YYY -> d.y
+        ZZZ -> d.z
+
+
+triSet : TriAxis -> v -> Tri v -> Tri v
+triSet a v d =
+    case a of
+        XXX -> { d | x = v }
+        YYY -> { d | y = v }
+        ZZZ -> { d | z = v }
+
+
+triMap : (v -> c) -> Tri v -> Tri c
+triMap f d =
+    { x = f d.x
+    , y = f d.y
+    , z = f d.z
+    }
+
+
+triAxisMap : (TriAxis -> v -> c) -> Tri v -> Tri c
+triAxisMap f d =
+    { x = f XXX d.x
+    , y = f YYY d.y
+    , z = f ZZZ d.z
+    }
+
+
+triApply : Tri (a -> b) -> Tri a -> Tri b
+triApply fns d =
+    { x = fns.x d.x
+    , y = fns.y d.y
+    , z = fns.z d.z
+    }
+
+
+triFold : (v -> a -> a) -> a -> Tri v -> a
+triFold fn a d =
+    a |> fn d.x |> fn d.y |> fn d.z
+
+
+triToList : Tri v -> List v
+triToList d =
+    [ d.x, d.y, d.z]
+
+
+triFromList : List v -> Maybe (Tri v) 
+triFromList ls =
+    case ls of
+        [ x, y, z] -> Just <|Tri x y z
+        _ -> Nothing
+
 
 

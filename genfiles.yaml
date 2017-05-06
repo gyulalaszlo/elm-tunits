@@ -1,0 +1,15 @@
+- inputs:
+    - templates/uniform-base.hb.elm
+    - templates/uniform-record.hb.elm
+    - templates/uniform-constructors.hb.elm
+    - templates/uniform-axis.hb.elm
+    - templates/uniform-trf.hb.elm
+    - templates/uniform-json.hb.elm
+  output: /tmp/BoundsEncode.elm
+
+  data:
+    name: Bounds
+    axis: Limit
+    typeParams: [a]
+    fields: {min: a, max: b}
+

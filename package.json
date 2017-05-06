@@ -1,0 +1,18 @@
+{
+  "name": "elm-tunits",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gen": "",
+    "generate": "node ./generate -g genfiles.yaml"
+  },
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "handlebars": "^4.0.8",
+    "yamljs": "^0.2.10"
+  }
+}
