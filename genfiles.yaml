@@ -34,14 +34,23 @@
       fields: {x: a, y: a, z: a, u: a, v: a}
 
 
-
-- inputs:
-    - *UNIFORM-TPL
-  outputs:
-
     "src/Units/Compose/Range.elm":
       <<: *UNIFORM-N
       concatFn: { min: min, max: max }
       name: Range
       axis: Edge
       fields: {min: a, max: a}
+
+- inputs:
+    - templates/linear-base.hb.elm
+    - templates/uniform-imports.hb.elm
+    - templates/linear-type.hb.elm
+  outputs:
+    "src/Units/Linear/Length.elm":
+      name: "Length"
+      package: Units.Linear
+      kinds:
+        Zero: [Float]
+        Meters: [Float]
+        Millimeters: [Float]
+
