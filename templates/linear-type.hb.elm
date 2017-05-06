@@ -1,24 +1,66 @@
+
+-- TYPE ------------------------------------------------------------------------
+
+
+{-| Linear unit for
+-}
 type {{name}}
-    {{#join kinds first="    = " joiner="    | " as |name values| ~}}
-        {{name}} {{join values}}
+    {{#join kinds lines="    " first="    = " joiner="| " as |name values| ~}}
+        {{name}} {{join values.args joiner=" "}}
     {{~/join}}
 
+-- CONSTRUCTORS
 
-{{#join kinds first="" joiner="" lines=true as |name values| }}
+{{#join kinds first="" joiner="" lines="" as |kindName values| }}
 
-{{lowerFirst name}} : {{join values joiner=" -> "}} -> {{name}}
-{{lowerFirst name}} = {{name}}
+{-| Create a new value
+-}
+{{lowerFirst kindName}} : {{#with values.args~}}
+        {{join values.args joiner=" -> " }} -> {{ ../../name }}
+        {{else~}}
+        {{../name }}
+    {{/with}}
+{{lowerFirst kindName}} = {{kindName}}
 
 {{/join}}
 
-{{#join kinds first="" joiner="" lines=true as |name values| }}
+-- CONVERSIONS
 
-to{{name}} : {{name}} -> {{name}}
-to{{name}} v =
+{-| Converts `v` to its normalized value
+-}
+normalize : {{name}} -> {{normalizesTo}}
+normalize v =
     case v of
-    {{#join ../kinds lines=true joiner="    " as |vName vv| }}
-        {{vName}} -> {{vv}}
-    {{/join}}
+    {{#join kinds lines="" as |vName vv|}}
+        {{vName}} {{#join vv.args}} v{{key~}} {{/join}} -> {{vv.normalize}}
+    {{~/join}}
+
+
+{{#join kinds first="" joiner="" lines="" as |kindName values| }}
+
+
+{-| Converts `v` to be in {{name}}
+-}
+to{{kindName}} : {{../name}} -> {{../name}}
+to{{kindName}} v =
+    let input = normalize v
+    in case v of
+    {{#join ../kinds lines="" as |vName vv|}}
+        {{vName}} {{#join vv.args~}} v{{key}} {{/join~}}
+        -> {{kindName}} <| let input = {{vv.normalize}} in {{value.denormalize}}
+    {{~/join}}
+
+
+
+{-| Converts `v` to be in {{name}}
+-}
+in{{kindName}} : {{../name}} -> {{../normalizesTo}}
+in{{kindName}} v =
+    case v of
+    {{#join ../kinds lines="" as |vName vv|}}
+        {{vName}} {{#join vv.args~}} v{{key}} {{/join~}} -> {{vv.normalize}}
+    {{~/join}}
+
 
 {{/join}}
 

@@ -45,12 +45,19 @@
     - templates/linear-base.hb.elm
     - templates/uniform-imports.hb.elm
     - templates/linear-type.hb.elm
+
   outputs:
     "src/Units/Linear/Length.elm":
       name: "Length"
       package: Units.Linear
+      normalizesTo: Float
       kinds:
-        Zero: [Float]
-        Meters: [Float]
-        Millimeters: [Float]
+        Zero: { normalize: 0.0, denormalize: 0.0 }
+        Meters: { args: [Float], normalize: "v0", denormalize: "input" }
+        Millimeters: { args: [Float], normalize: "v0 * 0.001", denormalize: "input * 1000.0" }
+
+#        HumanScale:
+#          args: [Float, Float]
+#          normalize: "v0 * 1000 + v1 * 0.0001"
+#          denormalize: "(input / 1000.0) (trunc input * 1000.0)
 
