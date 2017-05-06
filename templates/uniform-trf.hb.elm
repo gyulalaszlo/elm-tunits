@@ -21,6 +21,14 @@ apply fns d =
     {{~/nFieldsLines}}
 
 
+{-| Helper for applying a function for two arguments (like fold)
+-}
+apply2 : {{name}} (a -> b -> c) -> {{name}} a -> {{name}} b -> {{name }} c
+apply2 fns a b =
+    {{#>nFieldsLines first="{ " joiner=", " last="}"~}}
+        {{hash.name}} = fns.{{hash.name}} a.{{hash.name}} b.{{hash.name}}
+    {{~/nFieldsLines}}
+
 -- FOLD ------------------------------------------------------------------------
 
 fold : (v -> a -> a) -> a -> {{name}} v -> a

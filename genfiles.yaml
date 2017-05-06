@@ -1,4 +1,4 @@
-- inputs:
+- inputs: &UNIFORM-TPL
     - templates/uniform-base.hb.elm
     - templates/uniform-imports.hb.elm
     - templates/uniform-record.hb.elm
@@ -6,36 +6,42 @@
     - templates/uniform-axis.hb.elm
     - templates/uniform-trf.hb.elm
     - templates/uniform-json.hb.elm
+    - templates/uniform-semigroup.hb.elm
+    - templates/uniform-monoid.hb.elm
 
   outputs:
 
-    "src/Units/Compose/Bounds.elm":
-      name: Bounds
-      package: Units.Compose
-      axis: Limit
-      typeParams: [a]
-      fields: {min: a, max: a}
-
-    "src/Units/Compose/N2.elm":
+    "src/Units/Compose/N2.elm": &UNIFORM-N
       name: N2
       package: Units.Compose
+      axis: Dimension
       typeParams: [a]
       fields: {x: a, y: a}
 
     "src/Units/Compose/N3.elm":
+      <<: *UNIFORM-N
       name: N3
-      package: Units.Compose
-      typeParams: [a]
       fields: {x: a, y: a, z: a}
 
     "src/Units/Compose/N4.elm":
+      <<: *UNIFORM-N
       name: N4
-      package: Units.Compose
-      typeParams: [a]
       fields: {x: a, y: a, z: a, u: a}
 
     "src/Units/Compose/N5.elm":
+      <<: *UNIFORM-N
       name: N5
-      package: Units.Compose
-      typeParams: [a]
       fields: {x: a, y: a, z: a, u: a, v: a}
+
+
+
+- inputs:
+    - *UNIFORM-TPL
+  outputs:
+
+    "src/Units/Compose/Range.elm":
+      <<: *UNIFORM-N
+      concatFn: { min: min, max: max }
+      name: Range
+      axis: Edge
+      fields: {min: a, max: a}

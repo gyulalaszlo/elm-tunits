@@ -32,17 +32,17 @@ from x y =
 
 -- Axis
 
-type Axis
+type Dimension
         = X
         | Y
         
 -- Axis naming metadata
 
-axisNames : List String
-axisNames  = [ "x", "y" ]
+dimensionNames : List String
+dimensionNames  = [ "x", "y" ]
 
-axisName : Axis -> String
-axisName a =
+dimensionName : Dimension -> String
+dimensionName a =
     case a of
         X -> "x"
         Y -> "y"
@@ -50,13 +50,13 @@ axisName a =
 
 -- Getters / Setters
 
-get : Axis -> N2 a -> a
+get : Dimension -> N2 a -> a
 get axis d =
     case axis of
         X -> d.x
         Y -> d.y
         
-set : Axis -> a -> N2 a -> N2 a
+set : Dimension -> a -> N2 a -> N2 a
 set axis v d =
     case axis of
         X -> { d | x = v }
@@ -71,8 +71,8 @@ map f d =
         , y = f d.y
         }
 
-mapWithAxis : (Axis -> v -> c) -> N2 v -> N2 c
-mapWithAxis f d =
+mapWithDimension : (Dimension -> v -> c) -> N2 v -> N2 c
+mapWithDimension f d =
         { x = f X d.x
         , y = f Y d.y
         }
@@ -83,6 +83,13 @@ apply fns d =
         , y = fns.y d.y
         }
 
+{-| Helper for applying a function for two arguments (like fold)
+-}
+apply2 : N2 (a -> b -> c) -> N2 a -> N2 b -> N2 c
+apply2 fns a b =
+        { x = fns.x a.x b.x
+        , y = fns.y a.y b.y
+        }
 -- FOLD ------------------------------------------------------------------------
 
 fold : (v -> a -> a) -> a -> N2 v -> a
@@ -127,3 +134,29 @@ decode vdecoder =
         N2
         (Json.Decode.field "x" vdecoder)
         (Json.Decode.field "y" vdecoder)
+
+
+
+{-| Concatenates `a` and `b` using the supplied concatenator function
+for all Dimension
+-}
+appendUniform : (v -> v -> v) -> N2 v -> N2 v -> N2 v
+appendUniform fn a b =
+        { x =  fn a.x b.x
+        , y =  fn a.y b.y
+        }
+
+-- EMPTY AND CONCAT ------------------------------------------------------------
+
+
+{-| Concatenates `a` and `b` using the supplied concatenator function pack.
+-}
+concat : N2 (v -> v -> v) -> N2 v -> List (N2 v) -> N2 v
+concat fns empty xs =
+    List.foldl (apply2 fns) empty xs
+
+{-| Concatenates `a` and `b` using the supplied concatenator function pack.
+-}
+concatUniform : (v -> v -> v) -> N2 v -> List (N2 v) -> N2 v
+concatUniform fn empty xs =
+    concat (uniform fn) empty xs

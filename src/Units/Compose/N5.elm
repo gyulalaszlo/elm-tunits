@@ -38,7 +38,7 @@ from x y z u v =
 
 -- Axis
 
-type Axis
+type Dimension
         = X
         | Y
         | Z
@@ -47,11 +47,11 @@ type Axis
         
 -- Axis naming metadata
 
-axisNames : List String
-axisNames  = [ "x", "y", "z", "u", "v" ]
+dimensionNames : List String
+dimensionNames  = [ "x", "y", "z", "u", "v" ]
 
-axisName : Axis -> String
-axisName a =
+dimensionName : Dimension -> String
+dimensionName a =
     case a of
         X -> "x"
         Y -> "y"
@@ -62,7 +62,7 @@ axisName a =
 
 -- Getters / Setters
 
-get : Axis -> N5 a -> a
+get : Dimension -> N5 a -> a
 get axis d =
     case axis of
         X -> d.x
@@ -71,7 +71,7 @@ get axis d =
         U -> d.u
         V -> d.v
         
-set : Axis -> a -> N5 a -> N5 a
+set : Dimension -> a -> N5 a -> N5 a
 set axis v d =
     case axis of
         X -> { d | x = v }
@@ -92,8 +92,8 @@ map f d =
         , v = f d.v
         }
 
-mapWithAxis : (Axis -> v -> c) -> N5 v -> N5 c
-mapWithAxis f d =
+mapWithDimension : (Dimension -> v -> c) -> N5 v -> N5 c
+mapWithDimension f d =
         { x = f X d.x
         , y = f Y d.y
         , z = f Z d.z
@@ -110,6 +110,16 @@ apply fns d =
         , v = fns.v d.v
         }
 
+{-| Helper for applying a function for two arguments (like fold)
+-}
+apply2 : N5 (a -> b -> c) -> N5 a -> N5 b -> N5 c
+apply2 fns a b =
+        { x = fns.x a.x b.x
+        , y = fns.y a.y b.y
+        , z = fns.z a.z b.z
+        , u = fns.u a.u b.u
+        , v = fns.v a.v b.v
+        }
 -- FOLD ------------------------------------------------------------------------
 
 fold : (v -> a -> a) -> a -> N5 v -> a
@@ -160,3 +170,32 @@ decode vdecoder =
         (Json.Decode.field "z" vdecoder)
         (Json.Decode.field "u" vdecoder)
         (Json.Decode.field "v" vdecoder)
+
+
+
+{-| Concatenates `a` and `b` using the supplied concatenator function
+for all Dimension
+-}
+appendUniform : (v -> v -> v) -> N5 v -> N5 v -> N5 v
+appendUniform fn a b =
+        { x =  fn a.x b.x
+        , y =  fn a.y b.y
+        , z =  fn a.z b.z
+        , u =  fn a.u b.u
+        , v =  fn a.v b.v
+        }
+
+-- EMPTY AND CONCAT ------------------------------------------------------------
+
+
+{-| Concatenates `a` and `b` using the supplied concatenator function pack.
+-}
+concat : N5 (v -> v -> v) -> N5 v -> List (N5 v) -> N5 v
+concat fns empty xs =
+    List.foldl (apply2 fns) empty xs
+
+{-| Concatenates `a` and `b` using the supplied concatenator function pack.
+-}
+concatUniform : (v -> v -> v) -> N5 v -> List (N5 v) -> N5 v
+concatUniform fn empty xs =
+    concat (uniform fn) empty xs
