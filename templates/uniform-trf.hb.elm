@@ -7,8 +7,8 @@ map f d =
     {{~/nFieldsLines}}
 
 
-{{>axisNameLower}}Map : ({{>axisName}} -> v -> c) -> {{name}} v -> {{name}} c
-{{>axisNameLower}}Map f d =
+mapWith{{>axisName}} : ({{>axisName}} -> v -> c) -> {{name}} v -> {{name}} c
+mapWith{{>axisName}} f d =
     {{#>nFieldsLines first="{ " joiner=", " last="}"~}}
         {{hash.name}} = f {{upperFirst hash.name}} d.{{{hash.name}}}
     {{~/nFieldsLines}}
@@ -17,7 +17,7 @@ map f d =
 apply : {{name}} (a -> b) -> {{name}} a -> {{name}} b
 apply fns d =
     {{#>nFieldsLines first="{ " joiner=", " last="}"~}}
-        {{hash.name}} = fns.{{upperFirst hash.name}} d.{{{hash.name}}}
+        {{hash.name}} = fns.{{hash.name}} d.{{{hash.name}}}
     {{~/nFieldsLines}}
 
 
@@ -25,7 +25,7 @@ apply fns d =
 
 fold : (v -> a -> a) -> a -> {{name}} v -> a
 fold fn a d =
-    a {{#>nFields~}} |> fn {{hash.name}} {{/nFields}}
+    a {{#>nFields~}} |> fn d.{{hash.name}} {{/nFields}}
 
 
 
@@ -34,10 +34,15 @@ fold fn a d =
 
 toList : {{name}} v -> List v
 toList d =
-    [ {{#>nFields joiner=", "~}} {{{hash.name}}} {{~/nFields}} ]
+    [ {{#>nFields joiner=", "~}} d.{{{hash.name}}} {{~/nFields}} ]
+
+
 
 fromList : List v ->  Maybe ({{name}} v)
 fromList l =
     case l of
         [ {{#>nFields joiner=", "~}} {{{hash.name}}} {{~/nFields}} ] -> Just <| {{name}} {{~#>nFields}} {{{hash.name}}} {{~/nFields}}
         _ -> Nothing
+
+
+

@@ -3,7 +3,7 @@
 
 -- Axis
 
-type {{#if axis~}} {{axis}} {{~else~}} Axis {{~/if}}
+type {{>axisName}}
     {{#>nFieldsLines joiner="| " first="= "~}}
         {{upperFirst hash.name}}
     {{~/nFieldsLines}}
@@ -13,7 +13,7 @@ type {{#if axis~}} {{axis}} {{~else~}} Axis {{~/if}}
 {{>axisNameLower}}Names : List String
 {{>axisNameLower}}Names  = [ {{#>nFields joiner=", "~}} {{{json hash.name}}} {{~/nFields}} ]
 
-{{>axisNameLower}}Name : {{name}}Axis -> String
+{{>axisNameLower}}Name : {{>axisName}} -> String
 {{>axisNameLower}}Name a =
     case a of
         {{#>nFieldsLines~}}
@@ -23,16 +23,16 @@ type {{#if axis~}} {{axis}} {{~else~}} Axis {{~/if}}
 
 -- Getters / Setters
 
-get : {{name}}Axis -> {{name}} -> v
-get a d =
-    case a of
+get : {{>axisName}} -> {{name}} {{>tArgs}} -> {{>tArgs}}
+get axis d =
+    case axis of
         {{#>nFieldsLines~}}
             {{upperFirst hash.name}} -> d.{{{hash.name}}}
         {{~/nFieldsLines}}
 
-set : {{name}}Axis -> {{#>tArgs}} -> {{/tArgs}} -> {{>tName}} -> {{>tName}}
-set a {{>tArgs}} d =
-    case a of
+set : {{>axisName}} -> {{#>tArgs}} -> {{/tArgs}} -> {{>tName}} -> {{>tName}}
+set axis v d =
+    case axis of
         {{#>nFieldsLines~}}
             {{upperFirst hash.name}} -> { d | {{{hash.name}}} = v }
         {{~/nFieldsLines}}

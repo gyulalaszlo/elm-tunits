@@ -10,7 +10,7 @@ let path       = require('path');
 Handlebars.registerHelper('lowerFirst', str => str.length > 0 ? str[0].toLowerCase() + str.substr(1) : str);
 Handlebars.registerHelper('upperFirst', str => str.length > 0 ? str[0].toUpperCase() + str.substr(1) : str);
 Handlebars.registerHelper('json', v => JSON.stringify(v));
-Handlebars.registerHelper('length', v => v.length);
+Handlebars.registerHelper('length', v => Array.isArray(v) ? v.length : Object.keys(v).length);
 
 
 // generateData("src/SEd/Operations/OperationKindData.yaml")

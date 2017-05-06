@@ -9,6 +9,9 @@ uniform v =
 {-| Creates a composite uniform unit from component values
 -}
 from : {{#>nFields joiner=" -> "}} {{hash.type}} {{/nFields}} -> {{name}} {{>tArgs}}
-from v = {  x = v ,  y = v ,  z = v  }
+from {{#>nFields~}} {{hash.name}} {{/nFields~}} =
+    {{#>nFieldsLines first="{ " last="}" joiner=", "~}}
+        {{hash.name}} = {{ hash.name }}
+    {{~/nFieldsLines}}
 
 

@@ -4,15 +4,15 @@
 encode : (v -> Json.Encode.Value) -> {{name}} v -> Json.Encode.Value
 encode vfn b =
     Json.Encode.object
-        {{#each fields}}
-        {{#if @first}}[ {{else}}, {{/if~}}
-        ("{{.}}", vfn b.{{.}})
-        {{/each}}
-        ]
+        {{#>nFieldsLines first="[ " joiner=", " last="]"~}}
+            ({{{json hash.name}}},  vfn b.{{hash.name}})
+        {{~/nFieldsLines}}
+
+
 
 decode : Json.Decode.Decoder v -> Json.Decode.Decoder ({{name}} v)
 decode vdecoder =
-    Json.Decode.map2
+    Json.Decode.map{{length fields}}
         {{name}}
         {{#each fields as |v k|}}
         (Json.Decode.field "{{k}}" vdecoder)
