@@ -33,14 +33,27 @@ apply{{current}} fns
 {{/nTimes}}
 
 -- MAP WITH AXIS ---------------------------------------------------------------
+{{#nTimes max=4 min=1 prefix="v" empty=1}}
 
-mapWith{{>axisName}} : ({{>axisName}} -> v -> c) -> {{name}} v -> {{name}} c
-mapWith{{>axisName}} f d =
-    {{#>nFieldsLines first="{ " joiner=", " last="}"~}}
-        {{hash.name}} = f {{upperFirst hash.name}} d.{{{hash.name}}}
-    {{~/nFieldsLines}}
+{{#unless current}}
+{-| Transform a the values in `v` using `fn`
+-}
+{{else}}
+{-| N-arity version of mapWith{{axisName}}
+-}
+{{/unless}}
+mapWith{{>axisName}}{{current}} : ({{>axisName ..}} -> {{#join elements joiner=" -> "~}} {{value.wrapped}} {{~/join}} -> out)
+    {{~#join elements}} -> {{../../name}} {{value.wrapped}} {{/join}} -> {{../name}} out
+mapWith{{>axisName}}{{current}} fn
+    {{~#join elements}} {{value.prefixed}} {{/join}} =
+    { {{#join ../fields lines="    " joiner=", " ~}}
+        {{key}} = fn {{upperFirst key}}
+            {{~#join ../elements}} {{value.prefixed}}.{{../key~}} {{/join}}
+    {{~/join}}
 
+    }
 
+{{/nTimes}}
 -- FOLD ------------------------------------------------------------------------
 
 fold : (v -> a -> a) -> a -> {{name}} v -> a

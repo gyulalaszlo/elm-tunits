@@ -2,6 +2,7 @@ module Units.Compose.N4 exposing (..)
 
 import Json.Encode
 import Json.Decode
+import Math.Vector4
 import Lens exposing (Lens)
 
 
@@ -31,6 +32,23 @@ from x y z u =
         , z = z
         , u = u
         }
+
+
+fromVec4 : Math.Vector4.Vec4 -> N4 Float
+fromVec4 input = Math.Vector4.toRecord input
+
+toVec4 : N4 Float -> Math.Vector4.Vec4
+toVec4 input = Math.Vector4.fromRecord input
+
+
+{-| Lens to convert N4 Float from and to Math.Vector4.Vec4`
+-}
+lensForVec4 : Lens Math.Vector4.Vec4 (N4 Float)
+lensForVec4 =
+    { name = "Math.Vector4.Vec4 <-> N4"
+    , get = \v -> Ok <| fromVec4 v
+    , set = \v p -> Ok <| toVec4 v
+    }
 
 
 
@@ -225,13 +243,48 @@ apply4 fns v  v2  v3  v4  =
 
 -- MAP WITH AXIS ---------------------------------------------------------------
 
-mapWithAxis : (Axis -> v -> c) -> N4 v -> N4 c
-mapWithAxis f d =
-        { x = f X d.x
-        , y = f Y d.y
-        , z = f Z d.z
-        , u = f U d.u
-        }
+{-| Transform a the values in `v` using `fn`
+-}
+mapWithAxis : (Axis -> v -> out) -> N4 v  -> N4 out
+mapWithAxis fn v  =
+    { x = fn X v.x
+    , y = fn Y v.y
+    , z = fn Z v.z
+    , u = fn U v.u
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis2 : (Axis -> v -> v2 -> out) -> N4 v  -> N4 v2  -> N4 out
+mapWithAxis2 fn v  v2  =
+    { x = fn X v.x v2.x
+    , y = fn Y v.y v2.y
+    , z = fn Z v.z v2.z
+    , u = fn U v.u v2.u
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis3 : (Axis -> v -> v2 -> v3 -> out) -> N4 v  -> N4 v2  -> N4 v3  -> N4 out
+mapWithAxis3 fn v  v2  v3  =
+    { x = fn X v.x v2.x v3.x
+    , y = fn Y v.y v2.y v3.y
+    , z = fn Z v.z v2.z v3.z
+    , u = fn U v.u v2.u v3.u
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis4 : (Axis -> v -> v2 -> v3 -> v4 -> out) -> N4 v  -> N4 v2  -> N4 v3  -> N4 v4  -> N4 out
+mapWithAxis4 fn v  v2  v3  v4  =
+    { x = fn X v.x v2.x v3.x v4.x
+    , y = fn Y v.y v2.y v3.y v4.y
+    , z = fn Z v.z v2.z v3.z v4.z
+    , u = fn U v.u v2.u v3.u v4.u
+    }
 
 -- FOLD ------------------------------------------------------------------------
 
@@ -267,12 +320,11 @@ for all Axis
 -}
 appendUniform : (v -> v -> v) -> N4 v -> N4 v -> N4 v
 appendUniform fn a b =
-        { x =  fn a.x b.x
-        , y =  fn a.y b.y
-        , z =  fn a.z b.z
-        , u =  fn a.u b.u
-        }
-
+    { x = fn a.x b.x
+    , y = fn a.y b.y
+    , z = fn a.z b.z
+    , u = fn a.u b.u
+    }
 
 
 
@@ -283,15 +335,19 @@ appendUniform fn a b =
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
-concat : N4 (v -> v -> v) -> N4 v -> List (N4 v) -> N4 v
-concat fns empty xs =
+concatUsing : N4 (v -> v -> v) -> N4 v -> List (N4 v) -> N4 v
+concatUsing fns empty xs =
     List.foldl (apply2 fns) empty xs
+
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
 concatUniform : (v -> v -> v) -> N4 v -> List (N4 v) -> N4 v
 concatUniform fn empty xs =
-    concat (uniform fn) empty xs
+    concatUsing (uniform fn) empty xs
+
+
+
 
 
 

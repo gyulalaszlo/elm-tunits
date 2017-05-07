@@ -249,14 +249,52 @@ apply4 fns v  v2  v3  v4  =
 
 -- MAP WITH AXIS ---------------------------------------------------------------
 
-mapWithAxis : (Axis -> v -> c) -> N5 v -> N5 c
-mapWithAxis f d =
-        { x = f X d.x
-        , y = f Y d.y
-        , z = f Z d.z
-        , u = f U d.u
-        , v = f V d.v
-        }
+{-| Transform a the values in `v` using `fn`
+-}
+mapWithAxis : (Axis -> v -> out) -> N5 v  -> N5 out
+mapWithAxis fn v  =
+    { x = fn X v.x
+    , y = fn Y v.y
+    , z = fn Z v.z
+    , u = fn U v.u
+    , v = fn V v.v
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis2 : (Axis -> v -> v2 -> out) -> N5 v  -> N5 v2  -> N5 out
+mapWithAxis2 fn v  v2  =
+    { x = fn X v.x v2.x
+    , y = fn Y v.y v2.y
+    , z = fn Z v.z v2.z
+    , u = fn U v.u v2.u
+    , v = fn V v.v v2.v
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis3 : (Axis -> v -> v2 -> v3 -> out) -> N5 v  -> N5 v2  -> N5 v3  -> N5 out
+mapWithAxis3 fn v  v2  v3  =
+    { x = fn X v.x v2.x v3.x
+    , y = fn Y v.y v2.y v3.y
+    , z = fn Z v.z v2.z v3.z
+    , u = fn U v.u v2.u v3.u
+    , v = fn V v.v v2.v v3.v
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis4 : (Axis -> v -> v2 -> v3 -> v4 -> out) -> N5 v  -> N5 v2  -> N5 v3  -> N5 v4  -> N5 out
+mapWithAxis4 fn v  v2  v3  v4  =
+    { x = fn X v.x v2.x v3.x v4.x
+    , y = fn Y v.y v2.y v3.y v4.y
+    , z = fn Z v.z v2.z v3.z v4.z
+    , u = fn U v.u v2.u v3.u v4.u
+    , v = fn V v.v v2.v v3.v v4.v
+    }
 
 -- FOLD ------------------------------------------------------------------------
 
@@ -292,13 +330,12 @@ for all Axis
 -}
 appendUniform : (v -> v -> v) -> N5 v -> N5 v -> N5 v
 appendUniform fn a b =
-        { x =  fn a.x b.x
-        , y =  fn a.y b.y
-        , z =  fn a.z b.z
-        , u =  fn a.u b.u
-        , v =  fn a.v b.v
-        }
-
+    { x = fn a.x b.x
+    , y = fn a.y b.y
+    , z = fn a.z b.z
+    , u = fn a.u b.u
+    , v = fn a.v b.v
+    }
 
 
 
@@ -309,15 +346,19 @@ appendUniform fn a b =
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
-concat : N5 (v -> v -> v) -> N5 v -> List (N5 v) -> N5 v
-concat fns empty xs =
+concatUsing : N5 (v -> v -> v) -> N5 v -> List (N5 v) -> N5 v
+concatUsing fns empty xs =
     List.foldl (apply2 fns) empty xs
+
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
 concatUniform : (v -> v -> v) -> N5 v -> List (N5 v) -> N5 v
 concatUniform fn empty xs =
-    concat (uniform fn) empty xs
+    concatUsing (uniform fn) empty xs
+
+
+
 
 
 

@@ -177,11 +177,40 @@ apply4 fns v  v2  v3  v4  =
 
 -- MAP WITH AXIS ---------------------------------------------------------------
 
-mapWithEdge : (Edge -> v -> c) -> Range v -> Range c
-mapWithEdge f d =
-        { min = f Min d.min
-        , max = f Max d.max
-        }
+{-| Transform a the values in `v` using `fn`
+-}
+mapWithAxis : (Edge -> v -> out) -> Range v  -> Range out
+mapWithAxis fn v  =
+    { min = fn Min v.min
+    , max = fn Max v.max
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis2 : (Edge -> v -> v2 -> out) -> Range v  -> Range v2  -> Range out
+mapWithAxis2 fn v  v2  =
+    { min = fn Min v.min v2.min
+    , max = fn Max v.max v2.max
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis3 : (Edge -> v -> v2 -> v3 -> out) -> Range v  -> Range v2  -> Range v3  -> Range out
+mapWithAxis3 fn v  v2  v3  =
+    { min = fn Min v.min v2.min v3.min
+    , max = fn Max v.max v2.max v3.max
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis4 : (Edge -> v -> v2 -> v3 -> v4 -> out) -> Range v  -> Range v2  -> Range v3  -> Range v4  -> Range out
+mapWithAxis4 fn v  v2  v3  v4  =
+    { min = fn Min v.min v2.min v3.min v4.min
+    , max = fn Max v.max v2.max v3.max v4.max
+    }
 
 -- FOLD ------------------------------------------------------------------------
 
@@ -217,11 +246,31 @@ for all Edge
 -}
 appendUniform : (v -> v -> v) -> Range v -> Range v -> Range v
 appendUniform fn a b =
-        { min =  fn a.min b.min
-        , max =  fn a.max b.max
-        }
+    { min = fn a.min b.min
+    , max = fn a.max b.max
+    }
 
 
+
+
+
+{-| Concatenates `a` and `b` using the supplied concatenator function
+for all Axis
+-}
+appendScalar : Range comparable -> Range comparable -> Range comparable
+appendScalar  a b =
+    { min = Basics.min a.min b.min
+    , max = Basics.max a.max b.max
+    }
+
+{-| Concatenates `a` and `b` using the supplied concatenator function
+for all Axis
+-}
+scalarAppender : Range (comparable -> comparable -> comparable)
+scalarAppender =
+    { min = Basics.min
+    , max = Basics.max
+    }
 
 
 
@@ -231,15 +280,38 @@ appendUniform fn a b =
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
-concat : Range (v -> v -> v) -> Range v -> List (Range v) -> Range v
-concat fns empty xs =
+concatUsing : Range (v -> v -> v) -> Range v -> List (Range v) -> Range v
+concatUsing fns empty xs =
     List.foldl (apply2 fns) empty xs
+
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
 concatUniform : (v -> v -> v) -> Range v -> List (Range v) -> Range v
 concatUniform fn empty xs =
-    concat (uniform fn) empty xs
+    concatUsing (uniform fn) empty xs
+
+
+
+-- CONCAT SPECIALIZATION FOR:  comparable
+
+{-| Empty value for Scalar specializations
+-}
+emptyScalar : Range comparable
+emptyScalar =
+    { min = 0
+    , max = 0
+    }
+
+{-| Concatenates `a` and `b` using the supplied concatenator function
+for all Axis
+-}
+concatScalar : List (Range comparable) -> Range comparable
+concatScalar xs =
+    List.foldl (apply2 scalarAppender) emptyScalar xs
+
+
+
 
 
 

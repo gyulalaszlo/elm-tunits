@@ -219,12 +219,44 @@ apply4 fns v  v2  v3  v4  =
 
 -- MAP WITH AXIS ---------------------------------------------------------------
 
-mapWithAxis : (Axis -> v -> c) -> N3 v -> N3 c
-mapWithAxis f d =
-        { x = f X d.x
-        , y = f Y d.y
-        , z = f Z d.z
-        }
+{-| Transform a the values in `v` using `fn`
+-}
+mapWithAxis : (Axis -> v -> out) -> N3 v  -> N3 out
+mapWithAxis fn v  =
+    { x = fn X v.x
+    , y = fn Y v.y
+    , z = fn Z v.z
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis2 : (Axis -> v -> v2 -> out) -> N3 v  -> N3 v2  -> N3 out
+mapWithAxis2 fn v  v2  =
+    { x = fn X v.x v2.x
+    , y = fn Y v.y v2.y
+    , z = fn Z v.z v2.z
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis3 : (Axis -> v -> v2 -> v3 -> out) -> N3 v  -> N3 v2  -> N3 v3  -> N3 out
+mapWithAxis3 fn v  v2  v3  =
+    { x = fn X v.x v2.x v3.x
+    , y = fn Y v.y v2.y v3.y
+    , z = fn Z v.z v2.z v3.z
+    }
+
+
+{-| N-arity version of mapWith
+-}
+mapWithAxis4 : (Axis -> v -> v2 -> v3 -> v4 -> out) -> N3 v  -> N3 v2  -> N3 v3  -> N3 v4  -> N3 out
+mapWithAxis4 fn v  v2  v3  v4  =
+    { x = fn X v.x v2.x v3.x v4.x
+    , y = fn Y v.y v2.y v3.y v4.y
+    , z = fn Z v.z v2.z v3.z v4.z
+    }
 
 -- FOLD ------------------------------------------------------------------------
 
@@ -260,11 +292,10 @@ for all Axis
 -}
 appendUniform : (v -> v -> v) -> N3 v -> N3 v -> N3 v
 appendUniform fn a b =
-        { x =  fn a.x b.x
-        , y =  fn a.y b.y
-        , z =  fn a.z b.z
-        }
-
+    { x = fn a.x b.x
+    , y = fn a.y b.y
+    , z = fn a.z b.z
+    }
 
 
 
@@ -275,15 +306,19 @@ appendUniform fn a b =
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
-concat : N3 (v -> v -> v) -> N3 v -> List (N3 v) -> N3 v
-concat fns empty xs =
+concatUsing : N3 (v -> v -> v) -> N3 v -> List (N3 v) -> N3 v
+concatUsing fns empty xs =
     List.foldl (apply2 fns) empty xs
+
 
 {-| Concatenates `a` and `b` using the supplied concatenator function pack.
 -}
 concatUniform : (v -> v -> v) -> N3 v -> List (N3 v) -> N3 v
 concatUniform fn empty xs =
-    concat (uniform fn) empty xs
+    concatUsing (uniform fn) empty xs
+
+
+
 
 
 

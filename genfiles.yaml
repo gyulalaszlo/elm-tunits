@@ -52,6 +52,16 @@
       <<: *UNIFORM-N
       name: N4
       fields: {x: a, y: a, z: a, u: a}
+      imports:
+        - Math.Vector4
+        - Lens exposing (Lens)
+
+      alternatives:
+        - name: Vec4
+          type: Math.Vector4.Vec4
+          dimensionType: Float
+          from: Math.Vector4.toRecord input
+          to: Math.Vector4.fromRecord input
 
     "src/Units/Compose/N5.elm":
       <<: *UNIFORM-N
@@ -61,10 +71,28 @@
 
     "src/Units/Compose/Range.elm":
       <<: *UNIFORM-N
-      concatFn: { min: min, max: max }
       name: Range
       axis: Edge
       fields: {min: a, max: a}
+      concat:
+        - postfix: "Scalar"
+          typeParam: comparable
+          empty: { min: 0, max: 0 }
+          using: { min: Basics.min, max: Basics.max }
+
+    "src/Units/Compose/Rect.elm":
+      <<: *UNIFORM-N
+      name: Rect
+      axis: Side
+      fields: { left: a, right: a, top: a, bottom: a }
+
+      concat:
+        - postfix: "Scalar"
+          typeParam: comparable
+          empty: { left: 0, right: 0, top: 0, bottom: 0}
+          using: { left: min, right: max, top: min, bottom: max }
+
+
 
 - inputs:
     - templates/linear-base.hb.elm
