@@ -34,6 +34,22 @@ from x y z u =
         }
 
 
+zero : N4 number
+zero  = uniform 0
+
+
+
+one : N4 number
+one  = uniform 1
+
+
+
+
+
+
+
+
+
 fromVec4 : Math.Vector4.Vec4 -> N4 Float
 fromVec4 input = Math.Vector4.toRecord input
 
@@ -97,22 +113,111 @@ set axis v d =
         Z -> { d | z = v }
         U -> { d | u = v }
         
+
+-- TRANSFORM A SINGLE AXIS
+-- the first value always takes precendence in these maps
+
+
+{-| Map with the left value taking precendence
+-}
+mapLAxis : Axis -> (v -> v) -> N4 v  -> N4 v
+mapLAxis axis f v =
+    case axis of 
+        X -> { v | x = f v.x }
+        Y -> { v | y = f v.y }
+        Z -> { v | z = f v.z }
+        U -> { v | u = f v.u }
+
+{-| Map with the right value taking precendence
+-}
+mapRAxis : Axis -> (v -> v) -> N4 v  -> N4 v
+mapRAxis axis f v =
+    case axis of 
+        X -> { v | x = f v.x }
+        Y -> { v | y = f v.y }
+        Z -> { v | z = f v.z }
+        U -> { v | u = f v.u }
+
+{-| Map with the left value taking precendence
+-}
+mapLAxis2 : Axis -> (v -> v2 -> v) -> N4 v  -> N4 v2  -> N4 v
+mapLAxis2 axis f v v2 =
+    case axis of 
+        X -> { v | x = f v.x v2.x }
+        Y -> { v | y = f v.y v2.y }
+        Z -> { v | z = f v.z v2.z }
+        U -> { v | u = f v.u v2.u }
+
+{-| Map with the right value taking precendence
+-}
+mapRAxis2 : Axis -> (v -> v2 -> v2) -> N4 v  -> N4 v2  -> N4 v2
+mapRAxis2 axis f v v2 =
+    case axis of 
+        X -> { v2 | x = f v.x v2.x }
+        Y -> { v2 | y = f v.y v2.y }
+        Z -> { v2 | z = f v.z v2.z }
+        U -> { v2 | u = f v.u v2.u }
+
+{-| Map with the left value taking precendence
+-}
+mapLAxis3 : Axis -> (v -> v2 -> v3 -> v) -> N4 v  -> N4 v2  -> N4 v3  -> N4 v
+mapLAxis3 axis f v v2 v3 =
+    case axis of 
+        X -> { v | x = f v.x v2.x v3.x }
+        Y -> { v | y = f v.y v2.y v3.y }
+        Z -> { v | z = f v.z v2.z v3.z }
+        U -> { v | u = f v.u v2.u v3.u }
+
+{-| Map with the right value taking precendence
+-}
+mapRAxis3 : Axis -> (v -> v2 -> v3 -> v3) -> N4 v  -> N4 v2  -> N4 v3  -> N4 v3
+mapRAxis3 axis f v v2 v3 =
+    case axis of 
+        X -> { v3 | x = f v.x v2.x v3.x }
+        Y -> { v3 | y = f v.y v2.y v3.y }
+        Z -> { v3 | z = f v.z v2.z v3.z }
+        U -> { v3 | u = f v.u v2.u v3.u }
+
+{-| Map with the left value taking precendence
+-}
+mapLAxis4 : Axis -> (v -> v2 -> v3 -> v4 -> v) -> N4 v  -> N4 v2  -> N4 v3  -> N4 v4  -> N4 v
+mapLAxis4 axis f v v2 v3 v4 =
+    case axis of 
+        X -> { v | x = f v.x v2.x v3.x v4.x }
+        Y -> { v | y = f v.y v2.y v3.y v4.y }
+        Z -> { v | z = f v.z v2.z v3.z v4.z }
+        U -> { v | u = f v.u v2.u v3.u v4.u }
+
+{-| Map with the right value taking precendence
+-}
+mapRAxis4 : Axis -> (v -> v2 -> v3 -> v4 -> v4) -> N4 v  -> N4 v2  -> N4 v3  -> N4 v4  -> N4 v4
+mapRAxis4 axis f v v2 v3 v4 =
+    case axis of 
+        X -> { v4 | x = f v.x v2.x v3.x v4.x }
+        Y -> { v4 | y = f v.y v2.y v3.y v4.y }
+        Z -> { v4 | z = f v.z v2.z v3.z v4.z }
+        U -> { v4 | u = f v.u v2.u v3.u v4.u }
+
 -- Individual fields
+
 
 {-| Gets the `x` component from `d`
 -}
 x : N4 v -> v
 x d = d.x
 
+
 {-| Gets the `y` component from `d`
 -}
 y : N4 v -> v
 y d = d.y
 
+
 {-| Gets the `z` component from `d`
 -}
 z : N4 v -> v
 z d = d.z
+
 
 {-| Gets the `u` component from `d`
 -}

@@ -5,14 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "gen": "",
-    "generate": "gen-gen-gen -g genfiles.yaml"
+    "generate": "gen-gen-gen -g generate-these.ggg.yaml"
   },
   "author": "",
   "license": "BSD",
   "dependencies": {
-    "commander": "^2.9.0",
-    "handlebars": "^4.0.8",
-    "yamljs": "^0.2.10"
   }
 }

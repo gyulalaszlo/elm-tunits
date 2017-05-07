@@ -15,7 +15,25 @@ from {{#>nFields~}} {{hash.name}} {{/nFields~}} =
     {{~/nFieldsLines}}
 
 
+
+{{#each specialValues~}}
+
+
+{{name}} : {{#each inputs}} {{.}} -> {{/each~}}
+    {{../name}} {{join typeParams}}
+{{name}} {{#each inputs}}v{{@index}} {{/each}} = {{ formula }}
+
+
+
+{{/each}}
+
+
+
+
+
 {{#each alternatives~}}
+
+
 
 
 {{#*inline "dimType"~}}

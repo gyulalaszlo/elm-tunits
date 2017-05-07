@@ -42,15 +42,19 @@ normalize v =
 {-| Converts `v` to be in {{name}}
 -}
 to{{kindName}} : {{../name}} -> {{../name}}
-to{{kindName}} v =
+to{{kindName}} v = {{#if values.args }}
     let input = normalize v
     in case v of
     {{#join ../kinds lines="" as |vName vv|}}
-        {{vName}} {{#join vv.args~}} v{{key}} {{/join~}}
-        -> {{kindName}} <| let input = {{vv.normalize}} in {{values.denormalize}}
-    {{~/join}}
+        {{vName}} {{#join vv.args~}} v{{key}} {{/join~}} ->
+            let input = {{vv.normalize}}
+            in {{kindName}} {{#join values.denormalize}} ({{value}}){{/join}}
+    {{/join}}
+{{else~}}
+    {{kindName}}
+{{/if}}
 
-
+{{#if values.args}}
 
 {-| Converts `v` to be in {{name}}
 -}
@@ -58,9 +62,13 @@ in{{kindName}} : {{../name}} -> ({{join values.args joiner=", "}})
 in{{kindName}} v =
     case v of
     {{#join ../kinds lines="" as |vName vv|}}
-        {{vName}} {{#join vv.args~}} v{{key}} {{/join~}} -> {{vv.normalize}}
-    {{~/join}}
+        {{vName}} {{#join vv.args~}} v{{key}} {{/join~}} ->
+            let input = {{vv.normalize}}
+            in ({{join values.denormalize joiner=", "}})
+    {{/join}}
 
 
-{{/join}}
+{{/if}}
+
+{{~/join}}
 

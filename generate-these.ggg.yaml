@@ -1,4 +1,4 @@
-- inputs:
+- inputs: &UNIFORM_TEMPLATES
     - templates/uniform-base.hb.elm
     - templates/uniform-imports.hb.elm
     - templates/uniform-record.hb.elm
@@ -16,6 +16,20 @@
 #      axis: Dimension
       typeParams: [a]
       fields: {x: a}
+
+      specialValues:
+
+        - name: zero
+          typeParams: [number]
+          inputs: []
+          formula: "uniform 0"
+
+        - name: one
+          typeParams: [number]
+          inputs: []
+          formula: "uniform 1"
+
+
       imports:
         - Lens exposing (Lens)
 
@@ -63,28 +77,70 @@
           from: Math.Vector4.toRecord input
           to: Math.Vector4.fromRecord input
 
-    "src/Units/Compose/N5.elm":
-      <<: *UNIFORM-N
-      name: N5
-      fields: {x: a, y: a, z: a, u: a, v: a}
+# Specialized uniform structures (that arent symetric to
+# all fields)
+- inputs:
+    - *UNIFORM_TEMPLATES
 
-
+  outputs:
+    # A lower and a higher bound
     "src/Units/Compose/Range.elm":
       <<: *UNIFORM-N
       name: Range
       axis: Edge
       fields: {min: a, max: a}
+
+      aggregates:
+
+        - postfix: size
+          typeParam: number
+          type: number
+          formula: "max - min"
+
       concat:
         - postfix: "Scalar"
           typeParam: comparable
           empty: { min: 0, max: 0 }
           using: { min: Basics.min, max: Basics.max }
 
+    # A 2-dimensional range
     "src/Units/Compose/Rect.elm":
       <<: *UNIFORM-N
       name: Rect
       axis: Side
       fields: { left: a, right: a, top: a, bottom: a }
+
+      aggregates:
+
+        - postfix: width
+          typeParam: number
+          type: number
+          formula: "right - left"
+
+        - postfix: height
+          typeParam: number
+          type: number
+          formula: "bottom - top"
+
+        - postfix: size
+          typeParam: number
+          type: N2 number
+          formula: "N2 (right - left) (bottom - top)"
+
+        - postfix: xRange
+          typeParam: a
+          type: Range a
+          formula: "{ min = left, max = right }"
+
+        - postfix: yRange
+          typeParam: a
+          type: Range a
+          formula: "{ min = top, max = bottom }"
+
+      imports:
+        - Lens exposing (Lens)
+        - Units.Compose.Range as Range exposing (Range)
+        - Units.Compose.N2 as N2 exposing (N2)
 
       concat:
         - postfix: "Scalar"
@@ -112,5 +168,15 @@
         HumanScale:
           args: [Float, Float]
           normalize: "v0 * 1000 + v1 * 0.0001"
-          denormalize: ["input / 1000.0", "truncate input * 1000.0" ]
+          denormalize: ["input / 1000.0", "toFloat (truncate (input * 1000.0))" ]
+
+    "src/Units/Linear/Scale.elm":
+      name: "Scale"
+      package: Units.Linear
+      normalizesTo: Float
+      kinds:
+        Identity: { normalize: 1.0, denormalize: 1.0 }
+        Scalar: { args: [Float], normalize: "v0", denormalize: "input" }
+        Percent: { args: [Float], normalize: "v0 / 100.0", denormalize: "input * 100.0" }
+
 

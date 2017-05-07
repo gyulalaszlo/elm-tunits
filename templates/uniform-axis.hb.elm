@@ -37,9 +37,43 @@ set axis v d =
             {{upperFirst hash.name}} -> { d | {{{hash.name}}} = v }
         {{~/nFieldsLines}}
 
+
+-- TRANSFORM A SINGLE AXIS
+-- the first value always takes precendence in these maps
+
+{{#nTimes max=4 min=1 prefix="v" empty=1}}
+
+{-| Map with the left value taking precendence
+-}
+mapL{{>axisName ..}}{{current}} : {{>axisName ..}} -> ({{#join elements joiner=" -> "~}} {{value.wrapped}} {{~/join}} -> v)
+    {{~#join elements}} -> {{../../name}} {{value.wrapped}} {{/join}} -> {{../name}} v
+mapL{{>axisName ..}}{{current}} axis f
+    {{~#join elements}} {{value.prefixed~}} {{/join}} =
+    case axis of {{#join ../fields }}
+        {{upperFirst key}} -> { v | {{key}} = f {{!}}
+                {{~#join ../elements~}} {{value.prefixed}}.{{../key}} {{/join~}}
+                 }
+        {{~/join}}
+
+
+{-| Map with the right value taking precendence
+-}
+mapR{{>axisName ..}}{{current}} : {{>axisName ..}} -> ({{#join elements joiner=" -> "~}} {{value.wrapped}} {{~/join}} -> v{{current}})
+    {{~#join elements}} -> {{../../name}} {{value.wrapped}} {{/join}} -> {{../name}} v{{current}}
+mapR{{>axisName ..}}{{current}} axis f
+    {{~#join elements}} {{value.prefixed~}} {{/join}} =
+    case axis of {{#join ../fields }}
+        {{upperFirst key}} -> { v{{../current}} | {{key}} = f {{!}}
+                {{~#join ../elements~}} {{value.prefixed}}.{{../key}} {{/join~}}
+                 }
+        {{~/join}}
+
+{{/nTimes}}
+
 -- Individual fields
 
 {{#each fields as |t fieldName|}}
+
 {-| Gets the `{{fieldName}}` component from `d`
 -}
 {{fieldName}} : {{../name}} v -> v
@@ -47,6 +81,16 @@ set axis v d =
 
 {{/each}}
 
+{{#each aggregates }}
+
+-- AGGREGATE: {{postfix}}
+
+{-| Gets the `{{fieldName}}` component from `d`
+-}
+{{postfix}} : {{../name}} {{typeParam}} -> {{type}}
+{{postfix}} { {{~#join ../fields joiner=", " }} {{key}} {{/join~}} } = {{{ formula }}}
+
+{{/each}}
 -- Lens for each axis
 
 {-| Returns a new lens for the axis

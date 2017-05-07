@@ -3,6 +3,8 @@ module Units.Compose.Rect exposing (..)
 import Json.Encode
 import Json.Decode
 import Lens exposing (Lens)
+import Units.Compose.Range as Range exposing (Range)
+import Units.Compose.N2 as N2 exposing (N2)
 
 
 
@@ -31,6 +33,22 @@ from left right top bottom =
         , top = top
         , bottom = bottom
         }
+
+
+zero : Rect number
+zero  = uniform 0
+
+
+
+one : Rect number
+one  = uniform 1
+
+
+
+
+
+
+
 
 
 
@@ -79,28 +97,157 @@ set axis v d =
         Top -> { d | top = v }
         Bottom -> { d | bottom = v }
         
+
+-- TRANSFORM A SINGLE AXIS
+-- the first value always takes precendence in these maps
+
+
+{-| Map with the left value taking precendence
+-}
+mapLSide : Side -> (v -> v) -> Rect v  -> Rect v
+mapLSide axis f v =
+    case axis of 
+        Left -> { v | left = f v.left }
+        Right -> { v | right = f v.right }
+        Top -> { v | top = f v.top }
+        Bottom -> { v | bottom = f v.bottom }
+
+{-| Map with the right value taking precendence
+-}
+mapRSide : Side -> (v -> v) -> Rect v  -> Rect v
+mapRSide axis f v =
+    case axis of 
+        Left -> { v | left = f v.left }
+        Right -> { v | right = f v.right }
+        Top -> { v | top = f v.top }
+        Bottom -> { v | bottom = f v.bottom }
+
+{-| Map with the left value taking precendence
+-}
+mapLSide2 : Side -> (v -> v2 -> v) -> Rect v  -> Rect v2  -> Rect v
+mapLSide2 axis f v v2 =
+    case axis of 
+        Left -> { v | left = f v.left v2.left }
+        Right -> { v | right = f v.right v2.right }
+        Top -> { v | top = f v.top v2.top }
+        Bottom -> { v | bottom = f v.bottom v2.bottom }
+
+{-| Map with the right value taking precendence
+-}
+mapRSide2 : Side -> (v -> v2 -> v2) -> Rect v  -> Rect v2  -> Rect v2
+mapRSide2 axis f v v2 =
+    case axis of 
+        Left -> { v2 | left = f v.left v2.left }
+        Right -> { v2 | right = f v.right v2.right }
+        Top -> { v2 | top = f v.top v2.top }
+        Bottom -> { v2 | bottom = f v.bottom v2.bottom }
+
+{-| Map with the left value taking precendence
+-}
+mapLSide3 : Side -> (v -> v2 -> v3 -> v) -> Rect v  -> Rect v2  -> Rect v3  -> Rect v
+mapLSide3 axis f v v2 v3 =
+    case axis of 
+        Left -> { v | left = f v.left v2.left v3.left }
+        Right -> { v | right = f v.right v2.right v3.right }
+        Top -> { v | top = f v.top v2.top v3.top }
+        Bottom -> { v | bottom = f v.bottom v2.bottom v3.bottom }
+
+{-| Map with the right value taking precendence
+-}
+mapRSide3 : Side -> (v -> v2 -> v3 -> v3) -> Rect v  -> Rect v2  -> Rect v3  -> Rect v3
+mapRSide3 axis f v v2 v3 =
+    case axis of 
+        Left -> { v3 | left = f v.left v2.left v3.left }
+        Right -> { v3 | right = f v.right v2.right v3.right }
+        Top -> { v3 | top = f v.top v2.top v3.top }
+        Bottom -> { v3 | bottom = f v.bottom v2.bottom v3.bottom }
+
+{-| Map with the left value taking precendence
+-}
+mapLSide4 : Side -> (v -> v2 -> v3 -> v4 -> v) -> Rect v  -> Rect v2  -> Rect v3  -> Rect v4  -> Rect v
+mapLSide4 axis f v v2 v3 v4 =
+    case axis of 
+        Left -> { v | left = f v.left v2.left v3.left v4.left }
+        Right -> { v | right = f v.right v2.right v3.right v4.right }
+        Top -> { v | top = f v.top v2.top v3.top v4.top }
+        Bottom -> { v | bottom = f v.bottom v2.bottom v3.bottom v4.bottom }
+
+{-| Map with the right value taking precendence
+-}
+mapRSide4 : Side -> (v -> v2 -> v3 -> v4 -> v4) -> Rect v  -> Rect v2  -> Rect v3  -> Rect v4  -> Rect v4
+mapRSide4 axis f v v2 v3 v4 =
+    case axis of 
+        Left -> { v4 | left = f v.left v2.left v3.left v4.left }
+        Right -> { v4 | right = f v.right v2.right v3.right v4.right }
+        Top -> { v4 | top = f v.top v2.top v3.top v4.top }
+        Bottom -> { v4 | bottom = f v.bottom v2.bottom v3.bottom v4.bottom }
+
 -- Individual fields
+
 
 {-| Gets the `left` component from `d`
 -}
 left : Rect v -> v
 left d = d.left
 
+
 {-| Gets the `right` component from `d`
 -}
 right : Rect v -> v
 right d = d.right
+
 
 {-| Gets the `top` component from `d`
 -}
 top : Rect v -> v
 top d = d.top
 
+
 {-| Gets the `bottom` component from `d`
 -}
 bottom : Rect v -> v
 bottom d = d.bottom
 
+
+
+-- AGGREGATE: width
+
+{-| Gets the `` component from `d`
+-}
+width : Rect number -> number
+width { left ,  right ,  top ,  bottom } = right - left
+
+
+-- AGGREGATE: height
+
+{-| Gets the `` component from `d`
+-}
+height : Rect number -> number
+height { left ,  right ,  top ,  bottom } = bottom - top
+
+
+-- AGGREGATE: size
+
+{-| Gets the `` component from `d`
+-}
+size : Rect number -> N2 number
+size { left ,  right ,  top ,  bottom } = N2 (right - left) (bottom - top)
+
+
+-- AGGREGATE: xRange
+
+{-| Gets the `` component from `d`
+-}
+xRange : Rect a -> Range a
+xRange { left ,  right ,  top ,  bottom } = { min = left, max = right }
+
+
+-- AGGREGATE: yRange
+
+{-| Gets the `` component from `d`
+-}
+yRange : Rect a -> Range a
+yRange { left ,  right ,  top ,  bottom } = { min = top, max = bottom }
 
 -- Lens for each axis
 

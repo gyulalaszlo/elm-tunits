@@ -29,6 +29,22 @@ from min max =
         }
 
 
+zero : Range number
+zero  = uniform 0
+
+
+
+one : Range number
+one  = uniform 1
+
+
+
+
+
+
+
+
+
 
 
 
@@ -67,18 +83,97 @@ set axis v d =
         Min -> { d | min = v }
         Max -> { d | max = v }
         
+
+-- TRANSFORM A SINGLE AXIS
+-- the first value always takes precendence in these maps
+
+
+{-| Map with the left value taking precendence
+-}
+mapLEdge : Edge -> (v -> v) -> Range v  -> Range v
+mapLEdge axis f v =
+    case axis of 
+        Min -> { v | min = f v.min }
+        Max -> { v | max = f v.max }
+
+{-| Map with the right value taking precendence
+-}
+mapREdge : Edge -> (v -> v) -> Range v  -> Range v
+mapREdge axis f v =
+    case axis of 
+        Min -> { v | min = f v.min }
+        Max -> { v | max = f v.max }
+
+{-| Map with the left value taking precendence
+-}
+mapLEdge2 : Edge -> (v -> v2 -> v) -> Range v  -> Range v2  -> Range v
+mapLEdge2 axis f v v2 =
+    case axis of 
+        Min -> { v | min = f v.min v2.min }
+        Max -> { v | max = f v.max v2.max }
+
+{-| Map with the right value taking precendence
+-}
+mapREdge2 : Edge -> (v -> v2 -> v2) -> Range v  -> Range v2  -> Range v2
+mapREdge2 axis f v v2 =
+    case axis of 
+        Min -> { v2 | min = f v.min v2.min }
+        Max -> { v2 | max = f v.max v2.max }
+
+{-| Map with the left value taking precendence
+-}
+mapLEdge3 : Edge -> (v -> v2 -> v3 -> v) -> Range v  -> Range v2  -> Range v3  -> Range v
+mapLEdge3 axis f v v2 v3 =
+    case axis of 
+        Min -> { v | min = f v.min v2.min v3.min }
+        Max -> { v | max = f v.max v2.max v3.max }
+
+{-| Map with the right value taking precendence
+-}
+mapREdge3 : Edge -> (v -> v2 -> v3 -> v3) -> Range v  -> Range v2  -> Range v3  -> Range v3
+mapREdge3 axis f v v2 v3 =
+    case axis of 
+        Min -> { v3 | min = f v.min v2.min v3.min }
+        Max -> { v3 | max = f v.max v2.max v3.max }
+
+{-| Map with the left value taking precendence
+-}
+mapLEdge4 : Edge -> (v -> v2 -> v3 -> v4 -> v) -> Range v  -> Range v2  -> Range v3  -> Range v4  -> Range v
+mapLEdge4 axis f v v2 v3 v4 =
+    case axis of 
+        Min -> { v | min = f v.min v2.min v3.min v4.min }
+        Max -> { v | max = f v.max v2.max v3.max v4.max }
+
+{-| Map with the right value taking precendence
+-}
+mapREdge4 : Edge -> (v -> v2 -> v3 -> v4 -> v4) -> Range v  -> Range v2  -> Range v3  -> Range v4  -> Range v4
+mapREdge4 axis f v v2 v3 v4 =
+    case axis of 
+        Min -> { v4 | min = f v.min v2.min v3.min v4.min }
+        Max -> { v4 | max = f v.max v2.max v3.max v4.max }
+
 -- Individual fields
+
 
 {-| Gets the `min` component from `d`
 -}
 min : Range v -> v
 min d = d.min
 
+
 {-| Gets the `max` component from `d`
 -}
 max : Range v -> v
 max d = d.max
 
+
+
+-- AGGREGATE: size
+
+{-| Gets the `` component from `d`
+-}
+size : Range number -> number
+size { min ,  max } = max - min
 
 -- Lens for each axis
 
