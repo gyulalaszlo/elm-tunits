@@ -47,14 +47,14 @@ to{{kindName}} v =
     in case v of
     {{#join ../kinds lines="" as |vName vv|}}
         {{vName}} {{#join vv.args~}} v{{key}} {{/join~}}
-        -> {{kindName}} <| let input = {{vv.normalize}} in {{value.denormalize}}
+        -> {{kindName}} <| let input = {{vv.normalize}} in {{values.denormalize}}
     {{~/join}}
 
 
 
 {-| Converts `v` to be in {{name}}
 -}
-in{{kindName}} : {{../name}} -> {{../normalizesTo}}
+in{{kindName}} : {{../name}} -> ({{join values.args joiner=", "}})
 in{{kindName}} v =
     case v of
     {{#join ../kinds lines="" as |vName vv|}}

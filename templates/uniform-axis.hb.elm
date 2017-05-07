@@ -1,7 +1,7 @@
 
+-- AXIS : {{>axisName}}
 --------------------------------------------------------------------------------
 
--- Axis
 
 type {{>axisName}}
     {{#>nFieldsLines joiner="| " first="= "~}}
@@ -36,3 +36,36 @@ set axis v d =
         {{#>nFieldsLines~}}
             {{upperFirst hash.name}} -> { d | {{{hash.name}}} = v }
         {{~/nFieldsLines}}
+
+-- Individual fields
+
+{{#each fields as |t fieldName|}}
+{-| Gets the `{{fieldName}}` component from `d`
+-}
+{{fieldName}} : {{../name}} v -> v
+{{fieldName}} d = d.{{fieldName}}
+
+{{/each}}
+
+-- Lens for each axis
+
+{-| Returns a new lens for the axis
+-}
+axisToLens : {{>axisName}} -> Lens ({{name}} b) b
+axisToLens a =
+    case a of
+    {{#join fields as |name type| }}
+        {{upperFirst name}} ->
+            { name = {{ json name }}
+            , get = \v -> Ok <| v.{{name}}
+            , set = \v p -> Ok <| { p | {{name}} = v }
+            }
+    {{/join}}
+
+
+{-| returns a new lens for the given axis inside the Tri pointed to by `lens`
+-}
+concat{{>axisName}}ToLens : {{>axisName}} -> Lens a ({{name}} b) -> Lens a b
+concat{{>axisName}}ToLens axis lens =
+    Lens.concat lens <| axisToLens axis
+

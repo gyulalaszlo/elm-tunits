@@ -2,6 +2,10 @@ module Units.Compose.N3 exposing (..)
 
 import Json.Encode
 import Json.Decode
+import Math.Vector3
+import Lens exposing (Lens)
+
+
 
 type alias N3  a =
     { x : a
@@ -28,24 +32,43 @@ from x y z =
         }
 
 
+fromVec3 : Math.Vector3.Vec3 -> N3 Float
+fromVec3 input = Math.Vector3.toRecord input
+
+toVec3 : N3 Float -> Math.Vector3.Vec3
+toVec3 input = Math.Vector3.fromRecord input
 
 
+{-| Lens to convert N3 Float from and to Math.Vector3.Vec3`
+-}
+lensForVec3 : Lens Math.Vector3.Vec3 (N3 Float)
+lensForVec3 =
+    { name = "Math.Vector3.Vec3 <-> N3"
+    , get = \v -> Ok <| fromVec3 v
+    , set = \v p -> Ok <| toVec3 v
+    }
+
+
+
+
+
+
+-- AXIS : Axis
 --------------------------------------------------------------------------------
 
--- Axis
 
-type Dimension
+type Axis
         = X
         | Y
         | Z
         
 -- Axis naming metadata
 
-dimensionNames : List String
-dimensionNames  = [ "x", "y", "z" ]
+axisNames : List String
+axisNames  = [ "x", "y", "z" ]
 
-dimensionName : Dimension -> String
-dimensionName a =
+axisName : Axis -> String
+axisName a =
     case a of
         X -> "x"
         Y -> "y"
@@ -54,52 +77,155 @@ dimensionName a =
 
 -- Getters / Setters
 
-get : Dimension -> N3 a -> a
+get : Axis -> N3 a -> a
 get axis d =
     case axis of
         X -> d.x
         Y -> d.y
         Z -> d.z
         
-set : Dimension -> a -> N3 a -> N3 a
+set : Axis -> a -> N3 a -> N3 a
 set axis v d =
     case axis of
         X -> { d | x = v }
         Y -> { d | y = v }
         Z -> { d | z = v }
         
+-- Individual fields
+
+{-| Gets the `x` component from `d`
+-}
+x : N3 v -> v
+x d = d.x
+
+{-| Gets the `y` component from `d`
+-}
+y : N3 v -> v
+y d = d.y
+
+{-| Gets the `z` component from `d`
+-}
+z : N3 v -> v
+z d = d.z
+
+
+-- Lens for each axis
+
+{-| Returns a new lens for the axis
+-}
+axisToLens : Axis -> Lens (N3 b) b
+axisToLens a =
+    case a of
+        X ->
+            { name = "x"
+            , get = \v -> Ok <| v.x
+            , set = \v p -> Ok <| { p | x = v }
+            }
+        Y ->
+            { name = "y"
+            , get = \v -> Ok <| v.y
+            , set = \v p -> Ok <| { p | y = v }
+            }
+        Z ->
+            { name = "z"
+            , get = \v -> Ok <| v.z
+            , set = \v p -> Ok <| { p | z = v }
+            }
+
+
+{-| returns a new lens for the given axis inside the Tri pointed to by `lens`
+-}
+concatAxisToLens : Axis -> Lens a (N3 b) -> Lens a b
+concatAxisToLens axis lens =
+    Lens.concat lens <| axisToLens axis
+
+
 
 -- MAP -------------------------------------------------------------------------
 
-map : (v -> c) -> N3 v -> N3 c
-map f d =
-        { x = f d.x
-        , y = f d.y
-        , z = f d.z
-        }
+{-| -arity version of map.
+-}
+map : (v -> out) -> N3 v  -> N3 out
+map f v  =
+    { x = f v.x
+    , y = f v.y
+    , z = f v.z
+    }
 
-mapWithDimension : (Dimension -> v -> c) -> N3 v -> N3 c
-mapWithDimension f d =
+
+{-| 2-arity version of map.
+-}
+map2 : (v -> v2 -> out) -> N3 v  -> N3 v2  -> N3 out
+map2 f v  v2  =
+    { x = f v.x v2.x
+    , y = f v.y v2.y
+    , z = f v.z v2.z
+    }
+
+
+{-| 3-arity version of map.
+-}
+map3 : (v -> v2 -> v3 -> out) -> N3 v  -> N3 v2  -> N3 v3  -> N3 out
+map3 f v  v2  v3  =
+    { x = f v.x v2.x v3.x
+    , y = f v.y v2.y v3.y
+    , z = f v.z v2.z v3.z
+    }
+
+
+{-| 4-arity version of map.
+-}
+map4 : (v -> v2 -> v3 -> v4 -> out) -> N3 v  -> N3 v2  -> N3 v3  -> N3 v4  -> N3 out
+map4 f v  v2  v3  v4  =
+    { x = f v.x v2.x v3.x v4.x
+    , y = f v.y v2.y v3.y v4.y
+    , z = f v.z v2.z v3.z v4.z
+    }
+
+
+-- APPLY -----------------------------------------------------------------------
+
+apply : N3 (v -> out) -> N3 v  -> N3 out
+apply fns v  =
+    { x = fns.x v.x
+    , y = fns.y v.y
+    , z = fns.z v.z
+    }
+
+
+apply2 : N3 (v -> v2 -> out) -> N3 v  -> N3 v2  -> N3 out
+apply2 fns v  v2  =
+    { x = fns.x v.x v2.x
+    , y = fns.y v.y v2.y
+    , z = fns.z v.z v2.z
+    }
+
+
+apply3 : N3 (v -> v2 -> v3 -> out) -> N3 v  -> N3 v2  -> N3 v3  -> N3 out
+apply3 fns v  v2  v3  =
+    { x = fns.x v.x v2.x v3.x
+    , y = fns.y v.y v2.y v3.y
+    , z = fns.z v.z v2.z v3.z
+    }
+
+
+apply4 : N3 (v -> v2 -> v3 -> v4 -> out) -> N3 v  -> N3 v2  -> N3 v3  -> N3 v4  -> N3 out
+apply4 fns v  v2  v3  v4  =
+    { x = fns.x v.x v2.x v3.x v4.x
+    , y = fns.y v.y v2.y v3.y v4.y
+    , z = fns.z v.z v2.z v3.z v4.z
+    }
+
+
+-- MAP WITH AXIS ---------------------------------------------------------------
+
+mapWithAxis : (Axis -> v -> c) -> N3 v -> N3 c
+mapWithAxis f d =
         { x = f X d.x
         , y = f Y d.y
         , z = f Z d.z
         }
 
-apply : N3 (a -> b) -> N3 a -> N3 b
-apply fns d =
-        { x = fns.x d.x
-        , y = fns.y d.y
-        , z = fns.z d.z
-        }
-
-{-| Helper for applying a function for two arguments (like fold)
--}
-apply2 : N3 (a -> b -> c) -> N3 a -> N3 b -> N3 c
-apply2 fns a b =
-        { x = fns.x a.x b.x
-        , y = fns.y a.y b.y
-        , z = fns.z a.z b.z
-        }
 -- FOLD ------------------------------------------------------------------------
 
 fold : (v -> a -> a) -> a -> N3 v -> a
@@ -127,6 +253,39 @@ fromList l =
 
 
 
+-- APPEND ----------------------------------------------------------------------
+
+{-| Concatenates `a` and `b` using the supplied concatenator function
+for all Axis
+-}
+appendUniform : (v -> v -> v) -> N3 v -> N3 v -> N3 v
+appendUniform fn a b =
+        { x =  fn a.x b.x
+        , y =  fn a.y b.y
+        , z =  fn a.z b.z
+        }
+
+
+
+
+
+
+-- EMPTY AND CONCAT ------------------------------------------------------------
+
+
+{-| Concatenates `a` and `b` using the supplied concatenator function pack.
+-}
+concat : N3 (v -> v -> v) -> N3 v -> List (N3 v) -> N3 v
+concat fns empty xs =
+    List.foldl (apply2 fns) empty xs
+
+{-| Concatenates `a` and `b` using the supplied concatenator function pack.
+-}
+concatUniform : (v -> v -> v) -> N3 v -> List (N3 v) -> N3 v
+concatUniform fn empty xs =
+    concat (uniform fn) empty xs
+
+
 
 -- JSON ENCODE / DECODE
 
@@ -146,30 +305,3 @@ decode vdecoder =
         (Json.Decode.field "x" vdecoder)
         (Json.Decode.field "y" vdecoder)
         (Json.Decode.field "z" vdecoder)
-
-
-
-{-| Concatenates `a` and `b` using the supplied concatenator function
-for all Dimension
--}
-appendUniform : (v -> v -> v) -> N3 v -> N3 v -> N3 v
-appendUniform fn a b =
-        { x =  fn a.x b.x
-        , y =  fn a.y b.y
-        , z =  fn a.z b.z
-        }
-
--- EMPTY AND CONCAT ------------------------------------------------------------
-
-
-{-| Concatenates `a` and `b` using the supplied concatenator function pack.
--}
-concat : N3 (v -> v -> v) -> N3 v -> List (N3 v) -> N3 v
-concat fns empty xs =
-    List.foldl (apply2 fns) empty xs
-
-{-| Concatenates `a` and `b` using the supplied concatenator function pack.
--}
-concatUniform : (v -> v -> v) -> N3 v -> List (N3 v) -> N3 v
-concatUniform fn empty xs =
-    concat (uniform fn) empty xs

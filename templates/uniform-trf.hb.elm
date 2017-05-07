@@ -1,11 +1,38 @@
 -- MAP -------------------------------------------------------------------------
+{{#nTimes max=4 min=1 prefix="v" empty=1}}
 
-map : (v -> c) -> {{name}} v -> {{name}} c
-map f d =
-    {{#>nFieldsLines first="{ " joiner=", " last="}"~}}
-        {{hash.name}} = f d.{{{hash.name}}}
-    {{~/nFieldsLines}}
+{-| {{current}}-arity version of map.
+-}
+map{{current}} : ({{#join elements joiner=" -> "~}} {{value.wrapped}} {{~/join}} -> out)
+    {{~#join elements}} -> {{../../name}} {{value.wrapped}} {{/join}} -> {{../name}} out
+map{{current}} f
+    {{~#join elements}} {{value.prefixed}} {{/join}} =
+    { {{#join ../fields lines="    " joiner=", " ~}}
+        {{key}} = f
+            {{~#join ../elements}} {{value.prefixed}}.{{../key~}} {{/join}}
+    {{~/join}}
 
+    }
+
+{{/nTimes}}
+
+-- APPLY -----------------------------------------------------------------------
+{{#nTimes max=4 min=1 prefix="v" empty=1}}
+
+apply{{current}} : {{../name}} ({{#join elements joiner=" -> "~}} {{value.wrapped}} {{~/join}} -> out)
+    {{~#join elements}} -> {{../../name}} {{value.wrapped}} {{/join}} -> {{../name}} out
+apply{{current}} fns
+    {{~#join elements}} {{value.prefixed}} {{/join}} =
+    { {{#join ../fields lines="    " joiner=", " ~}}
+        {{key}} = fns.{{key}}
+            {{~#join ../elements}} {{value.prefixed}}.{{../key~}} {{/join}}
+    {{~/join}}
+
+    }
+
+{{/nTimes}}
+
+-- MAP WITH AXIS ---------------------------------------------------------------
 
 mapWith{{>axisName}} : ({{>axisName}} -> v -> c) -> {{name}} v -> {{name}} c
 mapWith{{>axisName}} f d =
@@ -13,21 +40,6 @@ mapWith{{>axisName}} f d =
         {{hash.name}} = f {{upperFirst hash.name}} d.{{{hash.name}}}
     {{~/nFieldsLines}}
 
-
-apply : {{name}} (a -> b) -> {{name}} a -> {{name}} b
-apply fns d =
-    {{#>nFieldsLines first="{ " joiner=", " last="}"~}}
-        {{hash.name}} = fns.{{hash.name}} d.{{{hash.name}}}
-    {{~/nFieldsLines}}
-
-
-{-| Helper for applying a function for two arguments (like fold)
--}
-apply2 : {{name}} (a -> b -> c) -> {{name}} a -> {{name}} b -> {{name }} c
-apply2 fns a b =
-    {{#>nFieldsLines first="{ " joiner=", " last="}"~}}
-        {{hash.name}} = fns.{{hash.name}} a.{{hash.name}} b.{{hash.name}}
-    {{~/nFieldsLines}}
 
 -- FOLD ------------------------------------------------------------------------
 

@@ -1,3 +1,4 @@
+-- APPEND ----------------------------------------------------------------------
 
 {-| Concatenates `a` and `b` using the supplied concatenator function
 for all {{>axisName}}
@@ -7,3 +8,8 @@ appendUniform fn a b =
     {{#>nFieldsLines first="{ " last="}" joiner=", "~}}
         {{hash.name}} =  fn a.{{hash.name}} b.{{hash.name}}
     {{~/nFieldsLines}}
+
+
+
+
+

@@ -1,27 +1,52 @@
-- inputs: &UNIFORM-TPL
+- inputs:
     - templates/uniform-base.hb.elm
     - templates/uniform-imports.hb.elm
     - templates/uniform-record.hb.elm
     - templates/uniform-constructors.hb.elm
     - templates/uniform-axis.hb.elm
     - templates/uniform-trf.hb.elm
-    - templates/uniform-json.hb.elm
     - templates/uniform-semigroup.hb.elm
     - templates/uniform-monoid.hb.elm
+    - templates/uniform-json.hb.elm
 
   outputs:
-
-    "src/Units/Compose/N2.elm": &UNIFORM-N
-      name: N2
+    "src/Units/Compose/N1.elm": &UNIFORM-N
+      name: N1
       package: Units.Compose
-      axis: Dimension
+#      axis: Dimension
       typeParams: [a]
+      fields: {x: a}
+      imports:
+        - Lens exposing (Lens)
+
+    "src/Units/Compose/N2.elm":
+      <<: *UNIFORM-N
+      name: N2
       fields: {x: a, y: a}
+      imports:
+        - Math.Vector2
+        - Lens exposing (Lens)
+      alternatives:
+        - name: Vec2
+          type: Math.Vector2.Vec2
+          dimensionType: Float
+          from: Math.Vector2.toRecord input
+          to: Math.Vector2.fromRecord input
 
     "src/Units/Compose/N3.elm":
       <<: *UNIFORM-N
       name: N3
       fields: {x: a, y: a, z: a}
+      imports:
+        - Math.Vector3
+        - Lens exposing (Lens)
+
+      alternatives:
+        - name: Vec3
+          type: Math.Vector3.Vec3
+          dimensionType: Float
+          from: Math.Vector3.toRecord input
+          to: Math.Vector3.fromRecord input
 
     "src/Units/Compose/N4.elm":
       <<: *UNIFORM-N
@@ -56,8 +81,8 @@
         Meters: { args: [Float], normalize: "v0", denormalize: "input" }
         Millimeters: { args: [Float], normalize: "v0 * 0.001", denormalize: "input * 1000.0" }
 
-#        HumanScale:
-#          args: [Float, Float]
-#          normalize: "v0 * 1000 + v1 * 0.0001"
-#          denormalize: "(input / 1000.0) (trunc input * 1000.0)
+        HumanScale:
+          args: [Float, Float]
+          normalize: "v0 * 1000 + v1 * 0.0001"
+          denormalize: ["input / 1000.0", "truncate input * 1000.0" ]
 
